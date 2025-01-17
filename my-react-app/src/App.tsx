@@ -25,8 +25,6 @@ function App() {
                     <Table.Head>
                         <Table.HeadCell>Id</Table.HeadCell>
                         <Table.HeadCell>Назва</Table.HeadCell>
-                        <Table.HeadCell>Фото</Table.HeadCell>
-                        <Table.HeadCell>Опис</Table.HeadCell>
                         <Table.HeadCell>Дії</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
@@ -36,8 +34,6 @@ function App() {
                                 <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                                     {category.name}
                                 </Table.Cell>
-                                <Table.Cell>{category.image}</Table.Cell>
-                                <Table.Cell>{category.description}</Table.Cell>
                                 <Table.Cell>
                                     <a href="#"
                                        className="font-medium text-cyan-600 hover:underline dark:text-cyan-500">

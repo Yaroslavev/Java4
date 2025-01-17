@@ -15,4 +15,26 @@ public class CategoryService {
     public List<CategoryEntity> getAllCategories() {
         return categoryRepository.findAll();
     }
+
+    public CategoryEntity getCategoryById(int id) {
+        return categoryRepository.findById(id).get();
+    }
+
+    public CategoryEntity createCategory(CategoryEntity category) {
+        CategoryEntity _category = new CategoryEntity();
+        _category.setName(category.getName());
+
+        return categoryRepository.save(_category);
+    }
+
+    public CategoryEntity updateCategory(CategoryEntity category, int id) {
+        CategoryEntity _category = categoryRepository.findById(id).get();
+
+        _category.setName(category.getName());
+        return categoryRepository.save(_category);
+    }
+
+    public void deleteCategory(int id) {
+        categoryRepository.deleteById(id);
+    }
 }
