@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -36,6 +37,14 @@ public class ImageService {
         catch (Exception e) {
             System.err.println(e.getMessage());
             throw new RuntimeException("Failed to download image: " + url);
+        }
+    }
+
+    public void deleteImage(String imageName) {
+        File image = new File(directory + "/" + imageName);
+
+        if (image.exists()) {
+            image.delete();
         }
     }
 
