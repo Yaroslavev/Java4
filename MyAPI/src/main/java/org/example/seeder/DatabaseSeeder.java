@@ -15,8 +15,8 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        imageSeeder.seed();
         categorySeeder.seed();
         productSeeder.seed();
-        imageSeeder.seed();
     }
 }

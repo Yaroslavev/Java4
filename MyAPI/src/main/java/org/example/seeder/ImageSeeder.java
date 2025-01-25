@@ -22,9 +22,6 @@ public class ImageSeeder {
 
             if (!Files.exists(path)) {
                 Files.createDirectory(path);
-                imageService.downloadImage("https://cdn.pixabay.com/photo/2014/06/03/19/38/board-361516_640.jpg", "test.jpg");
-                imageService.downloadImage("https://cdn.britannica.com/70/234870-050-D4D024BB/Orange-colored-cat-yawns-displaying-teeth.jpg", "cat.jpg");
-                imageService.downloadImage("https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Arduino_ftdi_chip-1.jpg/1200px-Arduino_ftdi_chip-1.jpg", "electronics.jpg");
             }
         }
         catch (Exception e) {
