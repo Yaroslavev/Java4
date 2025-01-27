@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.dto.ProductPostDto;
 import org.example.entities.CategoryEntity;
 import org.example.entities.ProductEntity;
 import org.example.repository.IProductRepository;
@@ -13,7 +14,9 @@ public class ProductService {
     @Autowired
     IProductRepository productRepository;
     @Autowired
-    ImageService imageService;
+    FileService fileService;
+    @Autowired
+    CategoryService categoryService;
 
     public List<ProductEntity> getAllProducts() {
         return productRepository.findAll();
@@ -23,34 +26,29 @@ public class ProductService {
         return productRepository.findById(id).get();
     }
 
-    public ProductEntity createProduct(ProductEntity product) {
+    public ProductEntity createProduct(ProductPostDto product) {
         ProductEntity _product = new ProductEntity();
         _product.setName(product.getName());
         _product.setCost(product.getCost());
-        _product.setImage(imageService.downloadImage(product.getImage()));
-        _product.setCategory(product.getCategory());
+        _product.setCategory(categoryService.getCategoryById(product.getCategoryId()));
+        _product.setImage(fileService.load(product.getImage()));
 
         return productRepository.save(_product);
     }
 
-    public ProductEntity updateProduct(ProductEntity product, int id) {
+    public ProductEntity updateProduct(ProductPostDto product, int id) {
         ProductEntity _product = productRepository.findById(id).get();
 
         _product.setName(product.getName());
         _product.setCost(product.getCost());
-        if (!_product.getImage().equals(product.getImage())) {
-            imageService.deleteImage(_product.getImage());
-            _product.setImage(imageService.downloadImage(product.getImage()));
-        } else {
-            _product.setImage((product.getImage()));
-        }
-        _product.setCategory(product.getCategory());
+        _product.setImage(fileService.replace(_product.getImage(), product.getImage()));
+        _product.setCategory(categoryService.getCategoryById(product.getCategoryId()));
 
         return productRepository.save(_product);
     }
 
     public void deleteProduct(int id) {
-        imageService.deleteImage(productRepository.findById(id).get().getImage());
+        fileService.remove(productRepository.findById(id).get().getImage());
         productRepository.deleteById(id);
     }
 }

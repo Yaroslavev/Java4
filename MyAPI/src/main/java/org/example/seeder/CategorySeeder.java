@@ -2,11 +2,9 @@ package org.example.seeder;
 
 import org.example.entities.CategoryEntity;
 import org.example.repository.ICategoryRepository;
-import org.example.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Component

@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +19,8 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/api/images")
 public class ImageController {
-    private String directory = "images";
+    @Value("${upload.directory}")
+    private String directory;
 
     @GetMapping("/{imageName}")
     public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
