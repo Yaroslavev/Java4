@@ -1,8 +1,10 @@
+import {CategoryModel} from "./CategoryModel.ts";
+
 export interface ProductModel {
     id: number;
     name: string;
     cost: number;
-    categoryId: number;
+    category: CategoryModel;
     image: string;
 }
 

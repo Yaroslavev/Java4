@@ -8,11 +8,11 @@ export const productsApi = createApi({
     endpoints: (builder) => ({
         getAllProducts: builder.query<ProductModel[], void>({
             query: () => 'products',
-            providesTags: ['Product'],
+            providesTags: [{ type: 'Product', id: 'LIST' }],
         }),
-        getProductById: builder.query<ProductModel, void>({
+        getProductById: builder.query<ProductModel, number>({
             query: (id) => `products/${id}`,
-            providesTags: (result, error, id) => [{ type: 'Category' , id }],
+            providesTags: (result, error, id) => [{ type: 'Product', id: `PRODUCT_${id}` }],
         }),
         createProduct: builder.mutation<ProductModel, Partial<ProductModel>>({
             query: (product) => ({
@@ -20,22 +20,23 @@ export const productsApi = createApi({
                 method: 'POST',
                 body: product,
             }),
-            invalidatesTags: ['Category'],
+            invalidatesTags: ['Product'],
         }),
-        updateProduct: builder.mutation<ProductModel, { id: number; product: Partial<ProductModel> }>({
-            query: ({ id, product }) => ({
+        updateProduct: builder.mutation<ProductModel, { id: number; body: FormData }>({
+            query: ({ id, body }) => ({
                 url: `products/${id}`,
                 method: 'PUT',
-                body: product,
+                body,
+                formData: true,
             }),
-            invalidatesTags: (result, error, { id }) => [{ type: 'Category', id }],
+            invalidatesTags: (result, error, { id }) => [{ type: 'Product', id: 'LIST' }, { type: 'Product', id: `PRODUCT_${id}` }],
         }),
         deleteProduct: builder.mutation<void, number>({
             query: (id) => ({
                 url: `products/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: (result, error, id) => [{ type: 'Category', id }],
+            invalidatesTags: [{ type: 'Product', id: 'LIST' }],
         }),
     }),
 });

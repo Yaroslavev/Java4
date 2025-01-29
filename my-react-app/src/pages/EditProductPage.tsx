@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ProductCreate } from '../models/Product.ts';
-import { useCreateProductMutation } from '../service/ProductsApi.ts';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useGetProductByIdQuery, useUpdateProductMutation } from '../service/ProductsApi.ts';
 import { useGetAllCategoriesQuery } from '../service/CategoriesApi.ts';
-import {ArrowUpTrayIcon} from "@heroicons/react/16/solid";
+import { ProductCreate } from "../models/Product.ts";
 import {APP_ENV} from "../env";
+import {ArrowUpTrayIcon} from "@heroicons/react/16/solid";
 
-const CreateProductPage: React.FC = () => {
+const EditProductPage: React.FC = () => {
+    const { id } = useParams();
+    const { data: getProduct, isLoading: getProductIsLoading, error: getProductError } = useGetProductByIdQuery(id);
+    const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useGetAllCategoriesQuery();
+    const [updateProduct, { isLoading: isUpdateLoading, error: updateError }] = useUpdateProductMutation();
+    const navigate = useNavigate();
+
     const [product, setProduct] = useState<ProductCreate>({
         name: '',
         cost: 0,
         categoryId: 1,
-        image: null,
+        image: null as File | null,
     });
 
-    const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useGetAllCategoriesQuery();
-    const [createProduct, { isLoading: isCreateLoading, error: createError }] = useCreateProductMutation();
-    const navigate = useNavigate();
-
+    useEffect(() => {
+        if (getProduct) {
+            setProduct({
+                name: getProduct.name,
+                cost: getProduct.cost,
+                categoryId: getProduct.category.id,
+                image: null,
+            });
+        }
+    }, [getProduct]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -30,10 +42,10 @@ const CreateProductPage: React.FC = () => {
         }
 
         try {
-            await createProduct(formData).unwrap();
+            await updateProduct({ id, body: formData }).unwrap();
             navigate(`..`);
         } catch (err) {
-            console.error('Error creating product:', err);
+            console.error('Error updating product:', err);
         }
     };
 
@@ -46,7 +58,7 @@ const CreateProductPage: React.FC = () => {
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
+        if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setProduct((prevProduct) => ({
                 ...prevProduct,
@@ -56,13 +68,17 @@ const CreateProductPage: React.FC = () => {
         }
     };
 
+    if (getProductIsLoading || isCategoriesLoading) {
+        return (<div>Loading...</div>);
+    }
+
     return (
         <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-lg">
-            <h1 className="text-gray-900 text-2xl font-bold text-center mb-6">Додати Продукт</h1>
+            <h1 className="text-gray-900 text-2xl font-bold text-center mb-6">Оновити Продукт</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label className="block text-gray-700" htmlFor="name">
-                        Назва Продукта
+                        Назва Продукту
                     </label>
                     <input
                         id="name"
@@ -115,13 +131,13 @@ const CreateProductPage: React.FC = () => {
                         Зображення Продукта
                     </label>
                     <div className="flex items-center">
-                        {product.imagePreview ? (
+                        {product.imagePreview || getProduct.image ? (
                             <img
                                 src={product.imagePreview || `${APP_ENV.REMOTE_BASE_URL}/images/${product.image ? product.image : getProduct.image}`}
-                                alt={product.name}
+                                alt={getProduct.image}
                                 className="text-gray-900 m-1 w-1/6 h-auto rounded"
                             />
-                        ) : (<span></span>)}
+                        ) : (<span className="text-gray-900 m-1">Зображення відсутнє</span>)}
                         <label
                             htmlFor="image"
                             className="cursor-pointer p-2 m-1 bg-blue-500 text-white font-semibold rounded shadow-md hover:bg-blue-600"
@@ -141,18 +157,18 @@ const CreateProductPage: React.FC = () => {
                 <div className="flex justify-center">
                     <button
                         type="submit"
-                        disabled={isCreateLoading}
-                        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full md:w-1/2 mt-4"
+                        disabled={isUpdateLoading}
+                        className="bg-blue-500 text-white font-semibold p-2 rounded w-full md:w-1/2 mt-4 hover:bg-blue-600"
                     >
-                        {isCreateLoading ? 'Додавання...' : 'Додати Продукт'}
+                        {isUpdateLoading ? 'Оновлення...' : 'Оновити Продукт'}
                     </button>
                 </div>
 
-                {createError && <p className="text-red-500 mt-2">Помилка при додаванні продукта!</p>}
+                {updateError && <p className="text-red-500 mt-2">Помилка при оновленні продукту!</p>}
                 {categoriesError && <p className="text-red-500 mt-2">Помилка при завантаженні категорій!</p>}
             </form>
         </div>
     );
 };
 
-export default CreateProductPage;
+export default EditProductPage;

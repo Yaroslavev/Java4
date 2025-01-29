@@ -1,6 +1,8 @@
 package org.example.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
@@ -24,7 +26,7 @@ public class ProductEntity {
 
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "category_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private CategoryEntity category;
 
     @Column(length = 5000)

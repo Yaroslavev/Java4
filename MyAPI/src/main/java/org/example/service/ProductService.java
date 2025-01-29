@@ -1,7 +1,6 @@
 package org.example.service;
 
 import org.example.dto.ProductPostDto;
-import org.example.entities.CategoryEntity;
 import org.example.entities.ProductEntity;
 import org.example.repository.IProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;

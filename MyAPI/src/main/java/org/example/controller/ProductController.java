@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -36,9 +38,9 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteProduct(@PathVariable int id) {
+    public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable int id) {
         productService.deleteProduct(id);
 
-        return ResponseEntity.ok("Product deleted successfully.");
+        return ResponseEntity.ok(Collections.singletonMap("message", "Product deleted successfully."));
     }
 }
