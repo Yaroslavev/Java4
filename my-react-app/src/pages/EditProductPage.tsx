@@ -137,7 +137,7 @@ const EditProductPage: React.FC = () => {
                                 alt={getProduct.image}
                                 className="text-gray-900 m-1 w-1/6 h-auto rounded"
                             />
-                        ) : (<span className="text-gray-900 m-1">Зображення відсутнє</span>)}
+                        ) : (<span></span>)}
                         <label
                             htmlFor="image"
                             className="cursor-pointer p-2 m-1 bg-blue-500 text-white font-semibold rounded shadow-md hover:bg-blue-600"

@@ -3,17 +3,25 @@ package org.example.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.imageio.ImageIO;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
 public class FileService {
-
     @Value("${upload.directory}")
     private String uploadDirectory;
+    @Value("${upload.maxSize.small}")
+    private int maxSize;
 
     public String load(MultipartFile file) {
         try {
@@ -21,21 +29,42 @@ public class FileService {
             if (file.isEmpty()) return "";
             Files.createDirectories(Paths.get(uploadDirectory));
 
-            // Отримуємо ім'я файлу та створюємо шлях для збереження
-            var fileName = file.getOriginalFilename();
-            var fileExt = fileName != null && fileName.contains(".")
-                    ? fileName.substring(fileName.lastIndexOf("."))
-                    : "";
-            var newFileName = UUID.randomUUID() + fileExt;
+            var newFileName = UUID.randomUUID() + ".webp";
             Path filePath = Paths.get(uploadDirectory, newFileName);
+            optimizeImage(file, filePath);
 
-            // Зберігаємо файл на сервер
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             return newFileName;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return "";
+        }
+    }
+
+    private void optimizeImage(MultipartFile file, Path filePath) throws IOException {
+        BufferedImage image = ImageIO.read(file.getInputStream());
+        int originalWidth = image.getWidth();
+        int originalHeight = image.getHeight();
+        int newWidth;
+        int newHeight;
+
+        if (originalWidth > originalHeight) {
+            newWidth = maxSize;
+            newHeight = (int) ((double) originalHeight / originalWidth * maxSize);
+        } else {
+            newHeight = maxSize;
+            newWidth = (int) ((double) originalWidth / originalHeight * maxSize);
+        }
+
+        Image scaledImage = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+
+        BufferedImage optimizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = optimizedImage.createGraphics();
+        g2d.drawImage(scaledImage, 0, 0, null);
+        g2d.dispose();
+
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new File(filePath.toString()))) {
+            ImageIO.write(optimizedImage, "webp", ios);
         }
     }
 
