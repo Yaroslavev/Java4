@@ -8,11 +8,11 @@ export const categoriesApi = createApi({
     endpoints: (builder) => ({
         getAllCategories: builder.query<CategoryModel[], void>({
             query: () => 'categories',
-            providesTags: ['Category'],
+            providesTags: [{ type: 'Category', id: 'LIST' }],
         }),
         getCategoryById: builder.query<CategoryModel, void>({
             query: (id) => `categories/${id}`,
-            providesTags: (result, error, id) => [{ type: 'Category' , id }],
+            providesTags: (result, error, id) => [{ type: 'Category' , id: `CATEGORY_${id}` }],
         }),
         createCategory: builder.mutation<CategoryModel, Partial<CategoryModel>>({
             query: (category) => ({
@@ -28,14 +28,14 @@ export const categoriesApi = createApi({
                 method: 'PUT',
                 body: category,
             }),
-            invalidatesTags: (result, error, { id }) => [{ type: 'Category', id }],
+            invalidatesTags: (result, error, { id }) => [{ type: 'Category', id: 'LIST' }, { type: 'Category', id: `CATEGORY_${id}` }],
         }),
         deleteCategory: builder.mutation<void, number>({
             query: (id) => ({
                 url: `categories/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: (result, error, id) => [{ type: 'Category', id }],
+            invalidatesTags: [{ type: 'Category', id: 'LIST' }],
         }),
     }),
 });
