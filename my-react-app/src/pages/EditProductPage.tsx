@@ -45,7 +45,7 @@ const EditProductPage: React.FC = () => {
             await updateProduct({ id, body: formData }).unwrap();
             navigate(`..`);
         } catch (err) {
-            console.error('Error updating product:', err);
+            console.error('Помилка при оновленні продукта', err);
         }
     };
 
