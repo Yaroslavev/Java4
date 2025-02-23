@@ -1,5 +1,7 @@
 package org.example.service;
 
+import org.example.entities.ProductEntity;
+import org.example.entities.ProductImageEntity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -23,21 +27,45 @@ public class FileService {
     @Value("${upload.maxSize.small}")
     private int maxSize;
 
-    public String load(MultipartFile file) {
+    public ProductImageEntity load(MultipartFile file, ProductEntity product) {
         try {
             // Перевіряємо, чи файл не порожній і чи існує директорія
-            if (file.isEmpty()) return "";
+            if (file.isEmpty()) return null;
             Files.createDirectories(Paths.get(uploadDirectory));
 
             var newFileName = UUID.randomUUID() + ".webp";
+            ProductImageEntity newFile = new ProductImageEntity(newFileName, 1, product);
             Path filePath = Paths.get(uploadDirectory, newFileName);
             optimizeImage(file, filePath);
 
-            return newFileName;
+            return newFile;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return "";
+            return null;
+        }
+    }
+
+    public List<ProductImageEntity> load(List<MultipartFile> files, ProductEntity product) {
+        try {
+            // Перевіряємо, чи файл не порожній і чи існує директорія
+            if (files.isEmpty()) return new ArrayList<>();
+            Files.createDirectories(Paths.get(uploadDirectory));
+            int priority = 0;
+            List<ProductImageEntity> images = new ArrayList<>();
+
+            for (int i = 0; i < files.size(); i++) {
+                var newFileName = UUID.randomUUID() + ".webp";
+                images.add(new ProductImageEntity(newFileName, priority++, product));
+                Path filePath = Paths.get(uploadDirectory, newFileName);
+                optimizeImage(files.get(i), filePath);
+            }
+
+            return images;
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ArrayList<>();
         }
     }
 
@@ -68,21 +96,38 @@ public class FileService {
         }
     }
 
-    public void remove(String fileName) {
+    public void remove(ProductImageEntity file) {
         try {
-            Path filePath = Paths.get(uploadDirectory + "/" + fileName);
+            Path filePath = Paths.get(uploadDirectory + "/" + file.getImage());
             Files.deleteIfExists(filePath);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public String replace(String oldFileName, MultipartFile newFile) {
-        var newFileName = load(newFile);
-        if (newFileName == ""){
-            return oldFileName;
+    public void remove(List<ProductImageEntity> images) {
+        for (int i = 0; i < images.size(); i++) {
+            remove(images.get(i));
         }
-        remove(oldFileName);
-        return newFileName;
+    }
+
+    public ProductImageEntity replace(ProductImageEntity oldFile, MultipartFile newFile, ProductEntity product) {
+        ProductImageEntity file = load(newFile, product);
+        if (file == null){
+            return oldFile;
+        }
+        remove(oldFile);
+
+        return file;
+    }
+
+    public List<ProductImageEntity> replace(List<ProductImageEntity> oldFiles, List<MultipartFile> newFiles, ProductEntity product) {
+        List<ProductImageEntity> newImages = load(newFiles, product);
+        if (newImages.isEmpty()){
+            return oldFiles;
+        }
+        remove(oldFiles);
+
+        return newImages;
     }
 }

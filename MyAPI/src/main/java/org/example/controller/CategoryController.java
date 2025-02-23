@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import org.example.dto.CategoryPostDto;
+import org.example.dto.CategoryShowDto;
 import org.example.entities.CategoryEntity;
 import org.example.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +17,22 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryEntity> getAllCategories() {
+    public List<CategoryShowDto> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryEntity> getCategoryById(@PathVariable int id) {
+    public ResponseEntity<CategoryShowDto> getCategoryById(@PathVariable int id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
     @PostMapping
-    public ResponseEntity<CategoryEntity> createCategory(@RequestBody CategoryEntity category) {
+    public ResponseEntity<CategoryShowDto> createCategory(@RequestBody CategoryPostDto category) {
         return ResponseEntity.ok(categoryService.createCategory(category));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryEntity> updateCategory(@RequestBody CategoryEntity category, @PathVariable int id) {
+    public ResponseEntity<CategoryShowDto> updateCategory(@RequestBody CategoryPostDto category, @PathVariable int id) {
         return ResponseEntity.ok(categoryService.updateCategory(category, id));
     }
 
