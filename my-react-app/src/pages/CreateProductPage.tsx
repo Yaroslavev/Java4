@@ -1,22 +1,28 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ProductCreate } from '../models/Product.ts';
 import { useCreateProductMutation } from '../service/ProductsApi.ts';
 import { useGetAllCategoriesQuery } from '../service/CategoriesApi.ts';
 import {ArrowUpTrayIcon} from "@heroicons/react/16/solid";
-import {APP_ENV} from "../env";
 
 const CreateProductPage: React.FC = () => {
     const [product, setProduct] = useState<ProductCreate>({
         name: '',
         cost: 0,
         categoryId: 1,
-        image: null,
+        images: [],
     });
 
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useGetAllCategoriesQuery();
     const [createProduct, { isLoading: isCreateLoading, error: createError }] = useCreateProductMutation();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach((preview) => URL.revokeObjectURL(preview));
+        };
+    }, [imagePreviews]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,9 +31,10 @@ const CreateProductPage: React.FC = () => {
         formData.append('name', product.name);
         formData.append('cost', product.cost.toString());
         formData.append('categoryId', product.categoryId.toString());
-        if (product.image) {
-            formData.append('image', product.image);
-        }
+
+        product.images.forEach((file) => {
+            formData.append('images', file);
+        })
 
         try {
             await createProduct(formData).unwrap();
@@ -41,20 +48,36 @@ const CreateProductPage: React.FC = () => {
         const { name, value } = e.target;
         setProduct((prevProduct) => ({
             ...prevProduct,
-            [name]: value,
+            [name]: name === 'cost' || name === 'categoryId' ? Number(value) : value,
         }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            const file = e.target.files[0];
+            const files = Array.from(e.target.files);
             setProduct((prevProduct) => ({
                 ...prevProduct,
-                image: file,
-                imagePreview: URL.createObjectURL(file),
+                images: [...prevProduct.images, ...files],
             }));
+            setImagePreviews((prevPreviews) => [
+                ...prevPreviews,
+                ...files.map(file => URL.createObjectURL(file)),
+            ]);
         }
     };
+
+    const handleRemoveImage = (index: number) => {
+        setProduct((prevProduct) => ({
+            ...prevProduct,
+            images: prevProduct.images.filter((_, i) => i !== index),
+        }));
+        setImagePreviews((prevPreviews) => {
+            const newPreviews = prevPreviews.filter((_, i) => i !== index);
+            URL.revokeObjectURL(prevPreviews[index]);
+
+            return newPreviews;
+        })
+    }
 
     return (
         <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -115,25 +138,32 @@ const CreateProductPage: React.FC = () => {
                         Зображення Продукта
                     </label>
                     <div className="flex items-center">
-                        {product.imagePreview ? (
-                            <img
-                                src={product.imagePreview || `${APP_ENV.REMOTE_BASE_URL}/images/${product.image ? product.image : getProduct.image}`}
-                                alt={product.name}
-                                className="text-gray-900 m-1 w-1/6 h-auto rounded"
-                            />
-                        ) : (<span></span>)}
+                        {imagePreviews.length > 0 && imagePreviews.map((preview, index) => (
+                            <div key={index} className="relative m-1">
+
+                                <img
+                                    key={index}
+                                    src={preview}
+                                    alt={`Preview ${index}`}
+                                    className="text-gray-900 m-1 h-14 rounded cursor-pointer hover:filter hover:brightness-75 transition duration-200"
+                                    onClick={() => handleRemoveImage(index)}
+                                />
+                            </div>
+                        ))}
                         <label
-                            htmlFor="image"
+                            htmlFor="images"
                             className="cursor-pointer p-2 m-1 bg-blue-500 text-white font-semibold rounded shadow-md hover:bg-blue-600"
                         >
                             <ArrowUpTrayIcon className="w-10 h-10" />
                         </label>
                         <input
-                            id="image"
-                            name="image"
+                            id="images"
+                            name="images"
                             type="file"
+                            multiple
                             onChange={handleFileChange}
                             className="hidden text-gray-900 w-full m-1 border border-gray-300 rounded mt-2"
+                            accept="image/*"
                         />
                     </div>
                 </div>
