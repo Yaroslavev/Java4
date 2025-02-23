@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.dto.ProductPostDto;
+import org.example.dto.ProductShowDto;
 import org.example.entities.ProductEntity;
 import org.example.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +21,20 @@ public class ProductController {
     ProductService productService;
 
     @GetMapping
-    public List<ProductEntity> getAllProducts() { return productService.getAllProducts(); }
+    public List<ProductShowDto> getAllProducts() { return productService.getAllProducts(); }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductEntity> getProductById(@PathVariable int id) {
+    public ResponseEntity<ProductShowDto> getProductById(@PathVariable int id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
 
     @PostMapping(consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductEntity> createProduct(@ModelAttribute ProductPostDto product) {
+    public ResponseEntity<ProductShowDto> createProduct(@ModelAttribute ProductPostDto product) {
         return ResponseEntity.ok(productService.createProduct(product));
     }
 
     @PutMapping(value = "/{id}", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ProductEntity> updateProduct(@ModelAttribute ProductPostDto product, @PathVariable int id) {
+    public ResponseEntity<ProductShowDto> updateProduct(@ModelAttribute ProductPostDto product, @PathVariable int id) {
         return ResponseEntity.ok(productService.updateProduct(product, id));
     }
 

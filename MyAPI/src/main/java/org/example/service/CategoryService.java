@@ -1,38 +1,41 @@
 package org.example.service;
 
+import lombok.AllArgsConstructor;
 import org.example.dto.CategoryPostDto;
+import org.example.dto.CategoryShowDto;
 import org.example.entities.CategoryEntity;
+import org.example.mapper.CategoryMapper;
 import org.example.repository.ICategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class CategoryService {
-    @Autowired
     private ICategoryRepository categoryRepository;
+    private CategoryMapper categoryMapper;
 
-    public List<CategoryEntity> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategoryShowDto> getAllCategories() {
+        return categoryMapper.toDto(categoryRepository.findAll());
     }
 
-    public CategoryEntity getCategoryById(int id) {
-        return categoryRepository.findById(id).get();
+    public CategoryShowDto getCategoryById(int id) {
+        return categoryMapper.toDto(categoryRepository.findById(id).get());
     }
 
-    public CategoryEntity createCategory(CategoryPostDto category) {
+    public CategoryShowDto createCategory(CategoryPostDto category) {
         CategoryEntity _category = new CategoryEntity();
         _category.setName(category.getName());
 
-        return categoryRepository.save(_category);
+        return categoryMapper.toDto(categoryRepository.save(_category));
     }
 
-    public CategoryEntity updateCategory(CategoryPostDto category, int id) {
+    public CategoryShowDto updateCategory(CategoryPostDto category, int id) {
         CategoryEntity _category = categoryRepository.findById(id).get();
 
         _category.setName(category.getName());
-        return categoryRepository.save(_category);
+        return categoryMapper.toDto(categoryRepository.save(_category));
     }
 
     public void deleteCategory(int id) {

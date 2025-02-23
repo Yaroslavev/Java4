@@ -19,7 +19,6 @@ public class CategoryEntity {
     @Column(length = 200, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.MERGE)
-    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductEntity> products;
 }

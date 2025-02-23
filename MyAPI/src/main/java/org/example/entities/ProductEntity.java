@@ -9,6 +9,8 @@ import lombok.Data;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.Check;
 
+import java.util.List;
+
 @Data
 @Entity
 @Table(name = "products_tbl")
@@ -24,11 +26,10 @@ public class ProductEntity {
     @Min(0)
     private double cost;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private CategoryEntity category;
 
-    @Column(length = 5000)
-    private String image;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImageEntity> images;
 }
