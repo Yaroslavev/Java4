@@ -16,10 +16,16 @@ const ProductsPage: React.FC = () => {
         try {
             await deleteProduct(id).unwrap();
             toast.success('Продукт успішно видалено!', { position: "top-right" });
-            setShowModal(false); // Закрити модальне вікно після видалення
+            setShowModal(false);
         } catch (err) {
             toast.error('Сталася помилка при видаленні!', { position: "top-right" });
         }
+    };
+
+    // Функція для отримання зображення з найменшим пріоритетом
+    const getLowestPriorityImage = (images: { id: number; priority: number; image: string }[]) => {
+        if (!images || images.length === 0) return null;
+        return images.reduce((prev, curr) => (prev.priority < curr.priority ? prev : curr));
     };
 
     if (isLoading) return <p>Loading...</p>;
@@ -50,36 +56,47 @@ const ProductsPage: React.FC = () => {
                         <Table.HeadCell>Дії</Table.HeadCell>
                     </Table.Head>
                     <Table.Body className="divide-y">
-                        {products?.map((product) => (
-                            <Table.Row key={product.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                    {product.name}
-                                </Table.Cell>
-                                <Table.Cell>
-                                    <img
-                                        src={`${APP_ENV.REMOTE_BASE_URL}/images/${product.image}`}
-                                        alt={product.name}
-                                        className="w-16 h-16 object-cover rounded"
-                                    />
-                                </Table.Cell>
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{product.cost}$</Table.Cell>
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">{product.category.name}</Table.Cell>
-                                <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                                    <Link
-                                        to={`edit/${product.id}`}
-                                        className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
-                                    >
-                                        Змінити
-                                    </Link>
-                                    <button
-                                        onClick={() => { setProductToDelete(product.id); setShowModal(true); }}
-                                        className="text-red-600 hover:underline ml-4"
-                                    >
-                                        Видалити
-                                    </button>
-                                </Table.Cell>
-                            </Table.Row>
-                        ))}
+                        {products?.map((product) => {
+                            const lowestPriorityImage = getLowestPriorityImage(product.images);
+                            return (
+                                <Table.Row key={product.id} className="bg-white dark:border-gray-700 dark:bg-gray-800">
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        {product.name}
+                                    </Table.Cell>
+                                    <Table.Cell>
+                                        {lowestPriorityImage ? (
+                                            <img
+                                                src={`${APP_ENV.REMOTE_BASE_URL}/images/${lowestPriorityImage.image}`}
+                                                alt={product.name}
+                                                className="h-12 object-cover rounded"
+                                            />
+                                        ) : (
+                                            <span>Немає фото</span>
+                                        )}
+                                    </Table.Cell>
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        {product.cost}$
+                                    </Table.Cell>
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        {product.category.name}
+                                    </Table.Cell>
+                                    <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                                        <Link
+                                            to={`edit/${product.id}`}
+                                            className="font-medium text-cyan-600 hover:underline dark:text-cyan-500"
+                                        >
+                                            Змінити
+                                        </Link>
+                                        <button
+                                            onClick={() => { setProductToDelete(product.id); setShowModal(true); }}
+                                            className="text-red-600 hover:underline ml-4"
+                                        >
+                                            Видалити
+                                        </button>
+                                    </Table.Cell>
+                                </Table.Row>
+                            );
+                        })}
                     </Table.Body>
                 </Table>
             </div>
