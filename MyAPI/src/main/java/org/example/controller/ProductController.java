@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.example.dto.ProductPostDto;
 import org.example.dto.ProductShowDto;
 import org.example.entities.ProductEntity;
