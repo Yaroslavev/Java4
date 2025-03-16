@@ -23,16 +23,14 @@ public class JwtService {
 
     public String generateAccessToken(UserEntity user) {
         var roles = userRoleRepository.findByUser(user);
-        Date currentDate = new Date();
         Date expireDate = new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000);
 
         SecretKey key = getSecretKey();
 
         return Jwts.builder()
                 .subject(format("%s,%s", user.getId(), user.getUsername()))
-                .claim("email", user.getUsername())
-                .claim("roles", roles.stream()                                      //витягується списочок ролей, які є у юзера
-                        .map((role) -> role.getRole().getName()).toArray(String []:: new))
+                .claim("roles", roles.stream()
+                        .map((role) -> role.getRole().getName()).toArray(String[]::new))
                 .issuedAt(new Date())
                 .expiration(expireDate)
                 .signWith(key)
@@ -64,7 +62,6 @@ public class JwtService {
         return claims.getSubject().split(",")[1];
     }
 
-    // метод повертає дату до якої живе токен
     public Date getExpirationDate(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSecretKey())
@@ -75,14 +72,16 @@ public class JwtService {
         return claims.getExpiration();
     }
 
-    //перевфряє чи наш токен валідний і чи видавався нашим сервером
     public boolean validate(String token) {
         try {
             SecretKey key = getSecretKey();
-            Jwts.parser().decryptWith(key).build().parse(token);
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (SignatureException ex) {
-            System.err.println("Invalid JWT signature - "+ ex.getMessage());
+            System.err.println("Invalid JWT signature - " + ex.getMessage());
         } catch (MalformedJwtException ex) {
             System.err.println("Invalid JWT token - " + ex.getMessage());
         } catch (ExpiredJwtException ex) {
