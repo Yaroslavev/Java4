@@ -4,7 +4,17 @@ import {ProductModel} from "../models/Product.ts";
 
 export const productsApi = createApi({
     reducerPath: 'productsApi',
-    baseQuery: fetchBaseQuery({ baseUrl: `${APP_ENV.REMOTE_BASE_URL}/api/` }),
+    baseQuery: fetchBaseQuery({
+        baseUrl: `${APP_ENV.REMOTE_BASE_URL}/api/`,
+        prepareHeaders: (headers, { getState }) =>  {
+            const token = getState().auth.token;
+            console.log(token);
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
+    }),
     endpoints: (builder) => ({
         getAllProducts: builder.query<ProductModel[], void>({
             query: () => 'products',

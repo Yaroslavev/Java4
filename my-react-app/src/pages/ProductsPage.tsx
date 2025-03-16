@@ -29,7 +29,7 @@ const ProductsPage: React.FC = () => {
     };
 
     if (isLoading) return <p>Loading...</p>;
-    if (error) return <p>Error occurred while fetching products.</p>;
+    if (error) return <p>Помилка при завантаженні продуктів</p>;
 
     return (
         <>

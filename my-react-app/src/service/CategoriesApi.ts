@@ -4,7 +4,17 @@ import {CategoryModel} from "../models/CategoryModel.ts";
 
 export const categoriesApi = createApi({
     reducerPath: 'categoriesApi',
-    baseQuery: fetchBaseQuery({ baseUrl: `${APP_ENV.REMOTE_BASE_URL}/api/` }),
+    baseQuery: fetchBaseQuery({
+        baseUrl: `${APP_ENV.REMOTE_BASE_URL}/api/`,
+        prepareHeaders: (headers, { getState }) =>  {
+            const token = getState().auth.token;
+            console.log(token);
+            if (token) {
+                headers.set('Authorization', `Bearer ${token}`);
+            }
+            return headers;
+        }
+    }),
     endpoints: (builder) => ({
         getAllCategories: builder.query<CategoryModel[], void>({
             query: () => 'categories',

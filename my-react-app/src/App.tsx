@@ -8,12 +8,18 @@ import EditProductPage from "./pages/EditProductPage.tsx";
 import CategoriesPage from "./pages/CategoriesPage.tsx";
 import CreateCategoryPage from "./pages/CreateCategoryPage.tsx";
 import EditCategoryPage from "./pages/EditCategoryPage.tsx";
+import LoginPage from "./pages/Auth/LoginPage.tsx";
+import RegisterPage from "./pages/Auth/RegisterPage.tsx";
 
 const App: React.FC = () => (
     <Router>
         <Routes>
             <Route path="/" element={<Layout />}>
                 <Route index element={<HomePage />} />
+                <Route path="auth">
+                    <Route path="login" element={<LoginPage />} />
+                    <Route path="register" element={<RegisterPage />} />
+                </Route>
                 <Route path="products" >
                     <Route index element={<ProductsPage />} />
                     <Route path="create" element={<CreateProductPage />} />
