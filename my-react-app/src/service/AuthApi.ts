@@ -30,7 +30,15 @@ export const authApi = createApi({
                 responseHandler: (response) => response.text(),
             }),
         }),
+        googleLogin: builder.mutation({
+            query: (credentials) => ({
+                url: 'auth/google',
+                method: 'POST',
+                body: credentials,
+                responseHandler: (response) => response.text(),
+            })
+        })
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGoogleLoginMutation } = authApi;
